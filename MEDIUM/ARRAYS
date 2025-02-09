@@ -1,0 +1,133 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+
+using namespace std;
+
+void enrollStudent(string programs[], int enrolledStudents[], int sectionStudents[][3], int& studentCount, int maxPrograms, int maxSections, int maxStudentsPerProgram, int maxStudentsPerSection) {
+    bool isFull = false;
+
+    if (studentCount >= maxPrograms * maxStudentsPerProgram) {
+        cout << "Enrollment is full!\n";
+        isFull = true;
+    }
+
+    if (!isFull) {
+        string name;
+        int age;
+        string address;
+        string birthday;
+        char sex;
+        string program;
+        char section;
+
+        cout << "Enter Name: ";
+        getline(cin, name);
+
+        cout << "Enter Age: ";
+        cin >> age;
+        cin.ignore();
+
+        cout << "Enter Address: ";
+        getline(cin, address);
+
+        cout << "Enter Birthday (YYYY-MM-DD): ";
+        getline(cin, birthday);
+
+        cout << "Enter Sex (M/F): ";
+        cin >> sex;
+        sex = toupper(sex);
+        cin.ignore();
+
+        cout << "Available Programs:\n";
+        for (int i = 0; i < maxPrograms; i++) {
+            cout << i + 1 << ". " << programs[i] << " (Enrolled: " << enrolledStudents[i] << ")\n";
+        }
+
+        int programChoice;
+        cout << "Choose a program (1-" << maxPrograms << "): ";
+        cin >> programChoice;
+        cin.ignore();
+
+        if (programChoice < 1 || programChoice > maxPrograms || enrolledStudents[programChoice - 1] >= maxStudentsPerProgram) {
+            cout << "Program is full or invalid choice!\n";
+            isFull = true;
+        }
+
+        if (!isFull) {
+            cout << "Available Sections: A, B, C\n";
+            cout << "Choose a section (A-C): ";
+            cin >> section;
+            cin.ignore();
+
+            section = toupper(section);
+            int sectionIndex = section - 'A';
+
+            if (sectionIndex < 0 || sectionIndex >= maxSections || sectionStudents[programChoice - 1][sectionIndex] >= maxStudentsPerSection) {
+                cout << "Section is full or invalid choice!\n";
+                isFull = true;
+            }
+
+            if (!isFull) {
+                program = programs[programChoice - 1];
+                enrolledStudents[programChoice - 1]++;
+                sectionStudents[programChoice - 1][sectionIndex]++;
+
+                studentCount++;
+                cout << "Student successfully enrolled in " << program << " Section " << section << "!\n";
+            }
+        }
+    }
+}
+
+void displayEnrollment(string programs[], int enrolledStudents[], int sectionStudents[][3], int maxPrograms, int maxSections) {
+    cout << "\nEnrollment Status:\n";
+    for (int i = 0; i < maxPrograms; i++) {
+        cout << programs[i] << " - Enrolled: " << enrolledStudents[i] << "\n";
+        for (int j = 0; j < maxSections; j++) {
+            cout << "  Section " << char('A' + j) << ": " << sectionStudents[i][j] << " students\n";
+        }
+    }
+}
+
+int main() {
+    int maxPrograms = 5;
+    int maxSections = 3;
+    int maxStudentsPerProgram = 15;
+    int maxStudentsPerSection = 5;
+
+    string programs[maxPrograms] = { "Computer Science", "Information Technology", "Engineering", "Business Administration", "Nursing" };
+    int enrolledStudents[maxPrograms] = { 0 };
+    int sectionStudents[maxPrograms][maxSections] = { {0} };
+    int studentCount = 0;
+
+    int choice;
+    bool exitFlag = false;
+
+    while (!exitFlag) {
+        cout << "\nCollege Enrollment System\n";
+        cout << "1. Enroll Student\n";
+        cout << "2. Display Enrollment\n";
+        cout << "3. Exit\n";
+        cout << "Choose an option: ";
+        cin >> choice;
+        cin.ignore();  // To avoid issues with newline character in the buffer
+
+        switch (choice) {
+        case 1:
+            enrollStudent(programs, enrolledStudents, sectionStudents, studentCount, maxPrograms, maxSections, maxStudentsPerProgram, maxStudentsPerSection);
+            break;
+        case 2:
+            displayEnrollment(programs, enrolledStudents, sectionStudents, maxPrograms, maxSections);
+            break;
+        case 3:
+            cout << "Exiting...\n";
+            exitFlag = true;
+            break;
+        default:
+            cout << "Invalid option!\n";
+        }
+    }
+
+    return 0;
+}
