@@ -1,0 +1,155 @@
+#include <iostream>
+#include <string>
+#include <cctype>
+
+using namespace std;
+
+struct Student {
+    string name;
+    int age;
+    string address;
+    string birthday;
+    char sex;
+    string program;
+    string section;
+};
+
+struct CollegeProgram {
+    string name;
+    int enrolledStudents;
+    int* sectionStudents;
+};
+
+void enrollStudent(CollegeProgram programs[], Student students[], int& studentCount, int maxPrograms, int maxSections, int maxStudentsPerProgram, int maxStudentsPerSection) {
+    bool isFull = false;
+    
+    if (studentCount >= maxPrograms * maxStudentsPerProgram) {
+        cout << "Enrollment is full!\n";
+        isFull = true;
+    }
+
+    Student newStudent;
+    if (!isFull) {
+        cout << "Enter Name: ";
+        getline(cin, newStudent.name);
+
+        cout << "Enter Age: ";
+        cin >> newStudent.age;
+        cin.ignore();
+
+        cout << "Enter Address: ";
+        getline(cin, newStudent.address);
+
+        cout << "Enter Birthday (YYYY-MM-DD): ";
+        getline(cin, newStudent.birthday);
+
+        cout << "Enter Sex (M/F): ";
+        cin >> newStudent.sex;
+        newStudent.sex = toupper(newStudent.sex);
+        cin.ignore();
+
+        cout << "Available Programs:\n";
+        for (int i = 0; i < maxPrograms; i++) {
+            cout << i + 1 << ". " << programs[i].name << " (Enrolled: " << programs[i].enrolledStudents << ")\n";
+        }
+
+        int programChoice;
+        cout << "Choose a program (1-" << maxPrograms << "): ";
+        cin >> programChoice;
+        cin.ignore();
+
+        if (programChoice < 1 || programChoice > maxPrograms || programs[programChoice - 1].enrolledStudents >= maxStudentsPerProgram) {
+            cout << "Program is full or invalid choice!\n";
+            isFull = true;
+        }
+
+        if (!isFull) {
+            cout << "Available Sections: A, B, C\n";
+            char sectionChoice;
+            cout << "Choose a section (A-C): ";
+            cin >> sectionChoice;
+            cin.ignore();
+
+            sectionChoice = toupper(sectionChoice);
+            int sectionIndex = sectionChoice - 'A';
+
+            if (sectionIndex < 0 || sectionIndex >= maxSections || programs[programChoice - 1].sectionStudents[sectionIndex] >= maxStudentsPerSection) {
+                cout << "Section is full or invalid choice!\n";
+                isFull = true;
+            }
+
+            if (!isFull) {
+                newStudent.program = programs[programChoice - 1].name;
+                newStudent.section = sectionChoice;
+                students[studentCount++] = newStudent;
+
+                programs[programChoice - 1].enrolledStudents++;
+                programs[programChoice - 1].sectionStudents[sectionIndex]++;
+
+                cout << "Student successfully enrolled in " << newStudent.program << " Section " << newStudent.section << "!\n";
+            }
+        }
+    }
+}
+
+void displayEnrollment(CollegeProgram programs[], int maxPrograms, int maxSections) {
+    cout << "\nEnrollment Status:\n";
+    for (int i = 0; i < maxPrograms; i++) {
+        cout << programs[i].name << " - Enrolled: " << programs[i].enrolledStudents << "\n";
+        for (int j = 0; j < maxSections; j++) {
+            cout << "  Section " << char('A' + j) << ": " << programs[i].sectionStudents[j] << " students\n";
+        }
+    }
+}
+
+int main() {
+    int maxPrograms = 5;
+    int maxSections = 3;
+    int maxStudentsPerProgram = 15;
+    int maxStudentsPerSection = 5;
+
+    CollegeProgram programs[maxPrograms] = {
+        {"Computer Science", 0, new int[maxSections]{0}},
+        {"Information Technology", 0, new int[maxSections]{0}},
+        {"Engineering", 0, new int[maxSections]{0}},
+        {"Business Administration", 0, new int[maxSections]{0}},
+        {"Nursing", 0, new int[maxSections]{0}}
+    };
+
+    Student students[maxPrograms * maxStudentsPerProgram];
+    int studentCount = 0;
+
+    int choice;
+    bool exitFlag = false;
+
+    while (!exitFlag) {
+        cout << "\nCollege Enrollment System\n";
+        cout << "1. Enroll Student\n";
+        cout << "2. Display Enrollment\n";
+        cout << "3. Exit\n";
+        cout << "Choose an option: ";
+        cin >> choice;
+        cin.ignore();
+
+        switch (choice) {
+            case 1:
+                enrollStudent(programs, students, studentCount, maxPrograms, maxSections, maxStudentsPerProgram, maxStudentsPerSection);
+                break;
+            case 2:
+                displayEnrollment(programs, maxPrograms, maxSections);
+                break;
+            case 3:
+                cout << "Exiting...\n";
+                exitFlag = true;
+                break;
+            default:
+                cout << "Invalid option!\n";
+        }
+    }
+
+    for (int i = 0; i < maxPrograms; i++) {
+        delete[] programs[i].sectionStudents;
+    }
+
+    return 0;
+}
